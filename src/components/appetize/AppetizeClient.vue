@@ -1,13 +1,13 @@
 <template>
   <div>
-    <card>
+    <card v-if="controls">
       <template #body>
         <div class="flex flex-nowrap text-center divide-x">
           <button
             v-for="system in systems"
             :key="system"
             class="flex-1 py-4"
-            :class="{ 'bg-primary-600': applications[system] == selectedApplication?.publicKey }"
+            :class="{ 'bg-primary-600': applications[system] == appetizeControls?.application?.publicKey }"
             @click="setSelectedApplication(system)"
           >
             {{ systemNames[system] }}
@@ -36,10 +36,10 @@
       </div>
       <appetize-controls
         v-if="controls"
-        v-model:device="device"
-        v-model:version="version"
+        v-model:device="appetizeControls.device"
+        v-model:version="appetizeControls.version"
         class="mt-8"
-        :os="selectedApplication.os"
+        :os="appetizeControls.application.os"
       />
     </div>
   </div>
@@ -50,6 +50,7 @@ import { appetizeClientKey } from '@/utils/keys.js'
 import { getSelectedApplicationFromSystem } from '@/libs/constants.js'
 import { Card } from '@/components/cards'
 import AppetizeControls from './control/AppetizeControls.vue'
+import { makeApplictionControls } from '@/composables/appetize/useAppetizeClient.js'
 
 defineOptions({
   inheritAttrs: false
@@ -59,6 +60,7 @@ const props = defineProps({
   // The systems that this client will support
   applications: {
     type: Object,
+    required: true,
     validator: (value) => {
       const systems = Object.keys(value)
       const acceptedValues = ['android', 'ios']
@@ -98,13 +100,16 @@ const device = defineModel('device')
 const version = defineModel('version')
 const selectedApplication = defineModel('application')
 
-// Get state if we are using a useAppetizeClient compose
-const state = inject(appetizeClientKey)
-
 const systems = computed(() => Object.keys(props.applications ?? {}))
 const isLoading = computed(() => props.isLoading || state?.meta.isLoadingClient)
 
+// Get state if we are using a useAppetizeClient compose
+// Fallback is the first system
+const state = inject(appetizeClientKey)
+const appetizeControls = state?.controls ?? makeApplictionControls({ application: props.applications[systems[0]] })
+
+
 const setSelectedApplication = (system) => {
-  selectedApplication.value = getSelectedApplicationFromSystem(system)
+  appetizeControls.application = getSelectedApplicationFromSystem(system)
 }
 </script>

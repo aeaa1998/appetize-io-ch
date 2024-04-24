@@ -11,16 +11,10 @@
           you will see the first article and trigger the share action.
         </div>
         <div class="flex flex-row space-x-4">
-          <div
-            v-for="option in startOptions"
-            :key="option.key"
-            class="px-4 py-2 rounded-full cursor-pointer"
-            :class="{
-              'bg-primary-600 font-bold': option.selected.value,
-              'bg-primary-200 hover:bg-primary-400': !option.selected.value
-            }"
-            @click="option.selected.value = !option.selected.value"
-          >
+          <div v-for="option in startOptions" :key="option.key" class="px-4 py-2 rounded-full cursor-pointer" :class="{
+    'bg-primary-600 font-bold': option.selected.value,
+    'bg-primary-200 hover:bg-primary-400': !option.selected.value
+  }" @click="option.selected.value = !option.selected.value">
             {{ option.name }}
           </div>
         </div>
@@ -32,37 +26,20 @@
           <div class="space-y-2">
             <v-label for="password">Password</v-label>
             <div class="relative w-full">
-              <v-input
-                :type="!loginForm.passwordVisible ? 'password' : 'input'"
-                class="w-full relative"
-                name="password"
-                v-model="loginForm.password"
-              />
+              <v-input :type="!loginForm.passwordVisible ? 'password' : 'input'" class="w-full relative" name="password"
+                v-model="loginForm.password" />
               <div class="h-full absolute top-0 right-0 flex flex-col justify-center pr-2">
-                <component
-                  class="h-6 w-6"
-                  :is="loginForm.passwordVisible ? EyeSlashIcon : EyeIcon"
-                  @click="loginForm.passwordVisible = !loginForm.passwordVisible"
-                />
+                <component class="h-6 w-6" :is="loginForm.passwordVisible ? EyeSlashIcon : EyeIcon"
+                  @click="loginForm.passwordVisible = !loginForm.passwordVisible" />
               </div>
             </div>
           </div>
-          <v-button
-            @click="startFlow"
-            :disabled="!isValid || processState.loading"
-            class="w-full md:w-fit min-w-72"
-          >
+          <v-button @click="startFlow" :disabled="!isValid || processState.loading" class="w-full md:w-fit min-w-72">
             {{ processState.loading ? 'Loading' : 'Start session' }}
           </v-button>
         </div>
       </div>
-      <appetize-client
-        v-model:device="appetizeControls.device"
-        v-model:version="appetizeControls.version"
-        v-model:application="appetizeControls.application"
-        :applications="applications"
-        :id="loginSampleId"
-      />
+      <appetize-client :applications="applications" :id="loginSampleId" />
     </div>
     <appetize-screenshots-card :screenshots="screenshots[appetizeControls.device] ?? []">
       <template #header>

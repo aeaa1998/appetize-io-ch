@@ -2,6 +2,17 @@ import { onBeforeMount, watch, reactive, provide, markRaw } from 'vue'
 import { appetizeClientKey } from '@/utils/keys.js'
 import { deviceByIdentifier, devices } from '@/libs/constants.js'
 
+export const makeApplictionControls = ({ application, device, initialOs, launchUrl }) => reactive({
+    // The selected application
+    application: application,
+    // The device to be used e.g. Nexus 5, iPhone 15 pro
+    device: device,
+    // The version os for the application e.g. Android 10, iOS 16.0
+    version: initialOs,
+    // The launch url path we are going to use
+    launchUrl: launchUrl
+  })
+
 /**
  *
  * @param {string} selector The css selector for the iframe. e.g. #iFrameId
@@ -39,15 +50,11 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
     resolve(clientResolved)
   })
 
-  const appetizeControls = reactive({
-    // The application selected
-    publicKey: sessionConfiguration.publicKey,
-    application: application,
-    // The device to be used e.g. Nexus 5, iPhone 15 pro
+
+  const appetizeControls = makeApplictionControls({
+    application,
     device: sessionConfiguration.device,
-    // The version os for the application e.g. Android 10, iOS 16.0
     version: initialOs,
-    // The launch url path we are going to use
     launchUrl: sessionConfiguration.launchUrl
   })
 
@@ -156,6 +163,7 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
 
   // Injection to the component
   provide(appetizeClientKey, {
+    controls: appetizeControls,
     meta,
     selector,
     actions: {

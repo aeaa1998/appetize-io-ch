@@ -20,9 +20,7 @@ const shareFlow = async (session, { username, password }, { skipLogin, skipOnboa
   const settingsPage = new SettingsPage(session)
   const loginPage = new LoginPage(session)
   const wikiPageView = new WikiPageView(session)
-  session.on('log', (messagge) => {
-    console.log(messagge)
-  })
+  
   // If we are nos skipping onboarding
   if (!skipOnboarding) {
     await onboardingPage.skipOnboarding()
