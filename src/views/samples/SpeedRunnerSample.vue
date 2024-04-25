@@ -12,31 +12,20 @@
       <div class="w-full md:w-2/3 space-y-4">
         <div class="space-y-2">
           <v-label for="username">Username</v-label>
-          <v-input class="w-full" name="username" v-model="loginForm.username" />
+          <v-input class="w-full" name="username" v-model="loginForm.username" :disabled="processState.loading" />
         </div>
         <div class="space-y-2">
           <v-label for="password">Password</v-label>
           <div class="relative w-full">
-            <v-input
-              :type="!loginForm.passwordVisible ? 'password' : 'input'"
-              class="w-full relative"
-              name="password"
-              v-model="loginForm.password"
-            />
+            <v-input :disabled="processState.loading" :type="!loginForm.passwordVisible ? 'password' : 'input'"
+              class="w-full relative" name="password" v-model="loginForm.password" />
             <div class="h-full absolute top-0 right-0 flex flex-col justify-center pr-2">
-              <component
-                class="h-6 w-6"
-                :is="loginForm.passwordVisible ? EyeSlashIcon : EyeIcon"
-                @click="loginForm.passwordVisible = !loginForm.passwordVisible"
-              />
+              <component class="h-6 w-6" :is="loginForm.passwordVisible ? EyeSlashIcon : EyeIcon"
+                @click="loginForm.passwordVisible = !loginForm.passwordVisible" />
             </div>
           </div>
         </div>
-        <v-button
-          @click="startFlow"
-          :disabled="!isValid || processState.loading"
-          class="w-full md:min-w-72 md:w-fit"
-        >
+        <v-button @click="startFlow" :disabled="!isValid || processState.loading" class="w-full md:min-w-72 md:w-fit">
           {{ processState.loading ? 'Loading' : 'Compare' }}
         </v-button>
       </div>
@@ -47,16 +36,12 @@
         <card class="space-y-4 border-primary border-2 px-2 py-4 rounded-md">
           <header-two class="w-full text-center">Android</header-two>
           <div class="text-center">Time to run the flow on android in seconds</div>
-          <header-three class="w-full text-center"
-            >{{ processState.androidTime.toFixed(2) }}s</header-three
-          >
+          <header-three class="w-full text-center">{{ processState.androidTime.toFixed(2) }}s</header-three>
         </card>
         <card class="space-y-4 border-primary border-2 px-2 py-4 rounded-md">
           <header-two class="w-full text-center">iOS</header-two>
           <div class="text-center">Time to run the flow on iOS in seconds</div>
-          <header-three class="w-full text-center"
-            >{{ processState.iosTime.toFixed(2) }}s</header-three
-          >
+          <header-three class="w-full text-center">{{ processState.iosTime.toFixed(2) }}s</header-three>
         </card>
       </div>
     </div>
@@ -199,7 +184,7 @@ const loginFlow = async (session, { username, password }) => {
   try {
     // It is android
     if (appetizeControls.application.os == 'android') {
-      await androidLoginFlow(session, loginForm.username, loginForm.password)
+      await androidLoginFlow(session, username, password)
       // Start the iOS session
       setiOSApplication()
       // Restart the flow after two seconds to give some time to client
@@ -207,7 +192,7 @@ const loginFlow = async (session, { username, password }) => {
         startFlow()
       }, 2000)
     } else {
-      await iosLoginFlow(session, loginForm.username, loginForm.password)
+      await iosLoginFlow(session, username, password)
       // Back to default first runner (Android)
       setAndroidApplication()
       processState.showWinner()
