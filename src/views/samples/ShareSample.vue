@@ -11,18 +11,19 @@
           you will see the first article and trigger the share action.
         </div>
         <div class="flex flex-wrap flex-row space-y-4 sm:space-y-0 sm:space-x-4 sm:flex-nowrap">
-          <div
+          <v-button
             v-for="option in startOptions"
             :key="option.key"
             class="px-4 py-2 rounded-full cursor-pointer w-full text-center sm:w-fit"
             :class="{
-              'bg-primary-600 font-bold': option.selected.value,
-              'bg-primary-200 hover:bg-primary-400': !option.selected.value
+              'font-bold': option.selected.value,
+              '!bg-primary-200 hover:bg-primary-400': !option.selected.value,
+              '!cursor-not-allowed': processState.loading
             }"
-            @click="option.selected.value = !option.selected.value"
+            @click="toggleSelectionIfAllowed(option)"
           >
             {{ option.name }}
-          </div>
+          </v-button>
         </div>
         <div class="w-full md:w-2/3 space-y-4">
           <div class="space-y-2">
@@ -159,14 +160,8 @@ const loginForm = reactive({
 const notification = useNotification()
 
 // Consuming the composition we have the business logic and state to only be consumed and reduce the overhead of logic
-const {
-  appetize,
-  onSessionStarted,
-  onScreenshotTaken,
-  appetizeControls,
-  onSessionEnded,
-  endSession
-} = useAppetizeClientFromId(loginSampleId, initialApplication, sessionConfig)
+const { appetize, onSessionStarted, onScreenshotTaken, appetizeControls, onSessionEnded } =
+  useAppetizeClientFromId(loginSampleId, initialApplication, sessionConfig)
 
 // Helper to see if it's empty or null
 const isNotEmptyorNull = (value) => value != null && value != ''
@@ -187,6 +182,14 @@ const getConfig = (startOptions) => {
   }, {})
 
   return config
+}
+
+const toggleSelectionIfAllowed = (option) => {
+  if (processState.loading) {
+    return
+  }
+  // Toggle value
+  option.selected.value = !option.selected.value
 }
 
 // Start the flow programatically
@@ -233,6 +236,22 @@ watch(startOptions[1].selected, async () => {
   await appetize.client?.setConfig(getConfig(startOptions))
 })
 
+// Each time we change device we also set the new configuration
+watch(
+  () => appetizeControls.device,
+  async () => {
+    await appetize.client?.setConfig(getConfig(startOptions))
+  }
+)
+
+// Each time we change device we also set the new configuration
+watch(
+  () => appetizeControls.application,
+  async () => {
+    await appetize.client?.setConfig(getConfig(startOptions))
+  }
+)
+
 onMounted(() => {
   // Set callback once the session has started
   onSessionStarted(async (session) => {
@@ -258,9 +277,10 @@ onMounted(() => {
   })
 
   // Register when the session has ended
-  onSessionEnded(() => {
+  onSessionEnded(async () => {
     processState.id += 1
     processState.clear()
+    await appetize.client?.setConfig(getConfig(startOptions))
   })
 })
 </script>

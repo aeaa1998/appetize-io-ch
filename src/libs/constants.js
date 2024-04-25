@@ -1,15 +1,15 @@
 const devices = {
   android: [
     {
-      name: 'Pixel 7 Pro',
-      identifier: 'pixel7pro',
-      os: '13.0,14.0'.split(','),
-      defaultOs: '13.0'
-    },
-    {
       name: 'Pixel 7',
       identifier: 'pixel7',
       os: '13.0'.split(','),
+      defaultOs: '13.0'
+    },
+    {
+      name: 'Pixel 7 Pro',
+      identifier: 'pixel7pro',
+      os: '13.0,14.0'.split(','),
       defaultOs: '13.0'
     },
     {
