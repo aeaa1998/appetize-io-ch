@@ -11,7 +11,7 @@
         </template>
       </modal>
       <div class="flex flex-wrap gap-x-6 gap-y-8">
-        <card v-for="screenshot in screenshots" :key="screenshot">
+        <card v-for="screenshot in screenshots" :key="screenshot" class="border border-gray">
           <template #body>
             <div class="px-2 py-4 flex justify-between">
               <div class="text-md font-semibold">
@@ -26,7 +26,7 @@
             <img
               @click="selectedImageModalState.show(screenshot)"
               :src="screenshot.data"
-              class="object-contain w-64 cursor-pointer border"
+              class="object-contain w-64 cursor-pointer border-t"
             />
           </template>
         </card>
