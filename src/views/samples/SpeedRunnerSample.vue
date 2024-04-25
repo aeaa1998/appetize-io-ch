@@ -6,7 +6,7 @@
     <div class="flex-1 space-y-6 flex flex-col md:items-center">
       <header-two> Speedrunner (Login) </header-two>
       <div class="text-gray sm:w-2/3">
-        Lets see who can finish first with login flow. (Both applications will be skipping
+        Enter your credentials to see which system will finish the login flow first. (Both applications will be skipping
         onboarding).
       </div>
       <div class="w-full md:w-2/3 space-y-4">
