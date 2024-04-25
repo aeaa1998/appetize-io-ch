@@ -76,6 +76,7 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/20/solid'
 import { deviceByIdentifier, applications } from '@/libs/constants.js'
 import androidShareFlow from '@/libs/flows/android/shareFlow.js'
 import iosShareFlow from '@/libs/flows/iOS/shareFlow.js'
+import useNotification from '@/composables/notifications/useNotification'
 
 const loginSampleId = 'loginSample'
 
@@ -146,11 +147,16 @@ const processState = reactive({
   }
 })
 
+// The state containing all the properties for the login form
 const loginForm = reactive({
   username: '',
   password: '',
   passwordVisible: false
 })
+
+// Notification object to show notifications
+const notification = useNotification()
+
 // Consuming the composition we have the business logic and state to only be consumed and reduce the overhead of logic
 const { appetize, onSessionStarted, onScreenshotTaken, appetizeControls, onSessionEnded } =
   useAppetizeClientFromId(loginSampleId, initialApplication, sessionConfig)
@@ -229,6 +235,12 @@ onMounted(() => {
   // Sets a listener whenever a ss was taken
   onScreenshotTaken((data) => {
     if (!screenshots.value[appetizeControls.device]) screenshots.value[appetizeControls.device] = []
+    // Show notification ss was taken
+    notification.showSuccess(
+      'Screenshot taken',
+      `The screenshot was successfully for ${appetizeControls.device}`
+    )
+    // Add the screenshot to the map
     screenshots.value[appetizeControls.device].push(
       markRaw({
         data,
