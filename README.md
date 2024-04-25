@@ -25,7 +25,7 @@ npm install
 ### Yarn
 
 ```sh
-npm run dev
+yarn dev
 ```
 
 ### NPM
