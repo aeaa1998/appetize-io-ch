@@ -1,8 +1,4 @@
-import {
-  LoginPage,
-  ExploreViewPage,
-  SettingsPage
-} from '@/libs/pages/ios'
+import { LoginPage, ExploreViewPage, SettingsPage } from '@/libs/pages/ios'
 
 /**
  * Does the login flow in the iOS application for wikipedia
