@@ -10,11 +10,11 @@
           Enter the user credentials in order to be able to start the application flow. After login
           you will see the first article and trigger the share action.
         </div>
-        <div class="flex flex-row space-x-4">
+        <div class="flex flex-wrap flex-row space-y-4 sm:space-y-0 sm:space-x-4 sm:flex-nowrap">
           <div
             v-for="option in startOptions"
             :key="option.key"
-            class="px-4 py-2 rounded-full cursor-pointer"
+            class="px-4 py-2 rounded-full cursor-pointer w-full text-center sm:w-fit"
             :class="{
               'bg-primary-600 font-bold': option.selected.value,
               'bg-primary-200 hover:bg-primary-400': !option.selected.value
@@ -37,6 +37,7 @@
                 class="w-full relative"
                 name="password"
                 v-model="loginForm.password"
+                @keyup.enter="startFlow"
               />
               <div class="h-full absolute top-0 right-0 flex flex-col justify-center pr-2">
                 <component
@@ -158,8 +159,14 @@ const loginForm = reactive({
 const notification = useNotification()
 
 // Consuming the composition we have the business logic and state to only be consumed and reduce the overhead of logic
-const { appetize, onSessionStarted, onScreenshotTaken, appetizeControls, onSessionEnded } =
-  useAppetizeClientFromId(loginSampleId, initialApplication, sessionConfig)
+const {
+  appetize,
+  onSessionStarted,
+  onScreenshotTaken,
+  appetizeControls,
+  onSessionEnded,
+  endSession
+} = useAppetizeClientFromId(loginSampleId, initialApplication, sessionConfig)
 
 // Helper to see if it's empty or null
 const isNotEmptyorNull = (value) => value != null && value != ''
@@ -185,6 +192,7 @@ const getConfig = (startOptions) => {
 // Start the flow programatically
 const startFlow = async () => {
   processState.setLoading()
+  // If there is a session lets clean it first
   await appetize.client.startSession(getConfig(startOptions))
 }
 

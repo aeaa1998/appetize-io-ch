@@ -76,8 +76,13 @@ export default class LoginPage {
       // resolves only when this condition is met
       const isResponse = data.type === 'response'
       const isLogin = data.request?.url?.includes('action=clientlogin') ?? false
-      const isOk = data.response?.status == 200 ?? false
-      return isResponse && isLogin && isOk
+      // Check for the login
+      if (isResponse && isLogin) {
+        const response = JSON.parse(data.response?.content?.text ?? '{}')
+        const isOk = response?.clientlogin?.status?.toLowerCase() == 'pass'
+        return isOk
+      }
+      return false
     })
   }
 }

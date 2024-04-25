@@ -36,6 +36,9 @@ export default class WikiPageView {
         }
       }
     })
+
+    // Wait for the options button to be displayed
+    await this.session.waitForAnimations()
   }
 
   /**

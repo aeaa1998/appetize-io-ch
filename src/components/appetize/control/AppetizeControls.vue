@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full px-2 py-4 flex flex-row space-x-4 rounded-md bg-white items-center md:space-y-4 md:flex-col md:w-fit md:space-x-0"
+    class="w-full px-2 py-4 flex flex-row-reverse flex-wrap justify-between rounded-md bg-white items-center sm:flex-row sm:space-x-4 md:space-y-4 md:flex-col md:w-fit md:space-x-0"
   >
     <popover>
       <appetize-control-button text="device" :icon="DevicePhoneMobileIcon" />

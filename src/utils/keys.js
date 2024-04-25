@@ -1,2 +1,2 @@
-export const appetizeClientKey = Symbol()
-export const notificationKey = Symbol()
+export const appetizeClientKey = Symbol('appetize-client')
+export const notificationKey = Symbol('notification')

@@ -62,10 +62,22 @@ export default class LoginPage {
     await this.session.waitForEvent('network', (data) => {
       // resolves only when this condition is met
       const isResponse = data.type === 'response'
-      const isLogin =
-        data.response?.content?.text?.includes('{"clientlogin":{"status":"PASS"') ?? false
-      const isOk = data.response?.status == 200 ?? false
-      return isResponse && isLogin && isOk
+
+      // It is not a response return false
+      if (!isResponse) {
+        return false
+      }
+      let response = null
+      try {
+        response = JSON.parse(data.response?.content?.text)
+        console.log(response)
+        return (
+          response?.clientlogin?.status?.toLowerCase() == 'pass' && data.response?.status == 200
+        )
+      } catch (error) {
+        // Failed to parse data is not the expecteed response
+        return false
+      }
     })
   }
 }

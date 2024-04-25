@@ -40,6 +40,9 @@ export default class WikiPageView {
    * Open the options in a page view
    */
   async openOptionsMenu() {
+    // Before interacting with the options Menu let's wait for the view to become idle
+    await this.session.waitForAnimations()
+
     await this.session.findElement({
       attributes: {
         'resource-id': 'org.wikipedia:id/page_toolbar_button_show_overflow_menu'
@@ -53,6 +56,8 @@ export default class WikiPageView {
         }
       }
     })
+    // Wait for the options to be displayed
+    await this.session.waitForAnimations()
   }
 
   /**
@@ -73,6 +78,7 @@ export default class WikiPageView {
       }
     })
 
+    // Wait for animations until the share view it's shown
     await this.session.waitForAnimations()
   }
 }

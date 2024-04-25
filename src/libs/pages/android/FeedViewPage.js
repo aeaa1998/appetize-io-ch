@@ -20,6 +20,9 @@ export default class FeedViewPage {
    * Taps on the first article visible in the feed view
    */
   async tapOnFirstArticle() {
+    // Before making an action let's make sure there are no animation UI is idle
+    await this.session.waitForAnimations()
+
     await this.session.findElement({
       attributes: {
         'resource-id': 'org.wikipedia:id/articleImage'

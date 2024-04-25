@@ -34,7 +34,7 @@ const useNotification = () => {
       // After three seconds hide notification
       notificationTimeout = setTimeout(() => {
         notification.show = false
-      }, 3000)
+      }, 2000)
     },
     showSuccess: (title, message) => {
       notification.showNotification(title, message, 'success')

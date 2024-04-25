@@ -28,6 +28,7 @@
               class="w-full relative"
               name="password"
               v-model="loginForm.password"
+              @keyup.enter="startFlow"
             />
             <div class="h-full absolute top-0 right-0 flex flex-col justify-center pr-2">
               <component
