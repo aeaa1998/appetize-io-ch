@@ -21,15 +21,32 @@
       :icon="PhotoIcon"
       @click="takeScreenShot"
     />
-    <!-- TODO ADD SETTINGS FUNCTIONALITY -->
-    <!-- <appetize-control-button text="settings" :icon="CogIcon" /> -->
+    <appetize-control-button
+      v-if="isDarkModeAllowed"
+      :disabled="meta.sessionLoaded"
+      @click="toggleAppearance"
+      :text="isDarkMode ? 'dark Mode' : 'light Mode'"
+      :icon="isDarkMode ? MoonIcon : SunIcon"
+    />
+    <appetize-control-button
+      :disabled="!meta.sessionLoaded"
+      @click="actions?.endSession()"
+      text="stop"
+      :icon="StopIcon"
+    />
   </div>
 </template>
 <script setup>
 import { appetizeClientKey } from '@/utils/keys.js'
 import { deviceOsByIdentifier, deviceByIdentifier, devices } from '@/libs/constants.js'
-import { watch, inject } from 'vue'
-import { CogIcon, DevicePhoneMobileIcon, PhotoIcon } from '@heroicons/vue/20/solid'
+import { watch, inject, computed } from 'vue'
+import {
+  SunIcon,
+  MoonIcon,
+  DevicePhoneMobileIcon,
+  PhotoIcon,
+  StopIcon
+} from '@heroicons/vue/20/solid'
 import Popover from '@/components/popover/Popover.vue'
 import AppetizeControlButton from './AppetizeControlButton.vue'
 import AppetizeDeviceSelect from './AppetizeDeviceSelect.vue'
@@ -41,6 +58,7 @@ const props = defineProps({
 
 const device = defineModel('device')
 const version = defineModel('version')
+const appearance = defineModel('appearance')
 
 // Get state if we are using a useAppetizeClient compose
 // TODO: Support it by also passing the client
@@ -49,6 +67,21 @@ const { meta, actions } = inject(appetizeClientKey)
 const takeScreenShot = async () => {
   await actions?.takeScreenshot()
 }
+
+const versionNumbered = computed(() => {
+  try {
+    return parseFloat(version.value)
+  } catch (error) {
+    return 0
+  }
+})
+
+const isDarkMode = computed(() => appearance.value == 'dark')
+const isDarkModeAllowed = computed(() =>
+  props.os == 'android' ? versionNumbered.value >= 10 : versionNumbered.value >= 13
+)
+
+const toggleAppearance = () => (appearance.value = isDarkMode.value ? 'light' : 'dark')
 
 // When the device changes we want to make sure the selected os is compatible else use the deault one
 watch(device, (device) => {

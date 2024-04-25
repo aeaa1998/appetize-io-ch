@@ -19,8 +19,7 @@
 </template>
 <script setup>
 import { deviceNameByIdentifier } from '@/libs/constants.js'
-import { ListboxOption } from '@headlessui/vue'
-import VSelectOption from '@/components/inputs/vselect/VSelectOption.vue'
+
 const props = defineProps({
   // The list of devices we can actually use
   devices: Array

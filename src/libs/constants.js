@@ -9,7 +9,7 @@ const devices = {
     {
       name: 'Nexus 5',
       identifier: 'nexus5',
-      os: '5.1,6.0,7.1,8.1,9.0,10.0,11.0'.split(','),
+      os: '8.1,9.0,10.0,11.0'.split(','),
       defaultOs: '11.0'
     },
     {

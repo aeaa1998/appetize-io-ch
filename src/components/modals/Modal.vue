@@ -27,6 +27,7 @@
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel
+              v-bind="$attrs"
               class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
             >
               <slot name="body">
@@ -43,7 +44,7 @@
                   </div>
                 </div>
                 <div v-if="$slots.footer">
-                  <div class="mt-5 sm:mt-6">
+                  <div class="mt-5 sm:mt-8 flex justify-end">
                     <slot name="footer" />
                   </div>
                 </div>
@@ -57,7 +58,10 @@
 </template>
 <script setup>
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import { CheckIcon } from '@heroicons/vue/24/outline'
+
+defineOptions({
+  inheritAttrs: false
+})
 
 const isVisible = defineModel('visible')
 </script>

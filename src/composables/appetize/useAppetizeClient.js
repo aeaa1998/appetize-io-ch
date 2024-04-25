@@ -1,16 +1,19 @@
-import { onBeforeMount, watch, reactive, provide, markRaw } from 'vue'
+import { onBeforeMount, watch, watchEffect, reactive, provide, markRaw } from 'vue'
 import { appetizeClientKey } from '@/utils/keys.js'
 import { deviceByIdentifier, devices } from '@/libs/constants.js'
 
-export const makeApplictionControls = ({ application, device, initialOs, launchUrl }) => reactive({
+export const makeApplictionControls = ({ application, device, version, launchUrl, appearance }) =>
+  reactive({
     // The selected application
     application: application,
     // The device to be used e.g. Nexus 5, iPhone 15 pro
     device: device,
     // The version os for the application e.g. Android 10, iOS 16.0
-    version: initialOs,
+    version: version,
     // The launch url path we are going to use
-    launchUrl: launchUrl
+    launchUrl: launchUrl,
+    // Light mode or dark mode
+    appearance
   })
 
 /**
@@ -22,9 +25,12 @@ export const makeApplictionControls = ({ application, device, initialOs, launchU
  */
 const useAppetizeClient = (selector, application, sessionConfiguration) => {
   const initialDevice = sessionConfiguration.device
+  const initialAppearance = sessionConfiguration.appearance ?? 'light'
   const initialOs = sessionConfiguration.version ?? deviceByIdentifier[initialDevice]?.defaultOs
 
   let screenshotTakenCallbacks = []
+  let sessionEndcallbacks = []
+
   let appetize = {
     client: null,
     session: null
@@ -43,6 +49,7 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
     }
     const clientResolved = await window.appetize.getClient(selector, {
       ...sessionConfiguration,
+      appearance: initialAppearance,
       publicKey: application.publicKey,
       osVersion: initialOs
     })
@@ -50,13 +57,21 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
     resolve(clientResolved)
   })
 
-
   const appetizeControls = makeApplictionControls({
     application,
+    appearance: initialAppearance,
     device: sessionConfiguration.device,
     version: initialOs,
     launchUrl: sessionConfiguration.launchUrl
   })
+
+  /**
+   *
+   * @param {Function} callback The callback to invoke once the session has ended
+   */
+  const onSessionEnded = (callback) => {
+    sessionEndcallbacks.push(callback)
+  }
 
   /**
    * Provides a clear way for components to know what to do when a session has started
@@ -68,6 +83,17 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
       meta.sessionLoaded = true
       appetize.session = session
       callback(session)
+
+      // When the session gets ended lets make sure we will clear the loading state
+      session.on('end', () => {
+        meta.sessionLoaded = false
+        sessionEndcallbacks.forEach((callback) => {
+          if (typeof callback == 'function') {
+            // Invoke the listener when the session eneded
+            callback()
+          }
+        })
+      })
     })
   }
 
@@ -110,7 +136,7 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
    */
   const endSession = async () => {
     if (!appetize.session) return
-    await appetize.client.endSession()
+    await appetize.session.end()
     appetize.session = null
     meta.sessionLoaded = false
   }
@@ -134,11 +160,22 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
     }
   )
 
+  // Watch when we change the version of the os
   watch(
     () => appetizeControls.version,
     async (version) => {
       ;(await clientPromise).setConfig({
         osVersion: version
+      })
+    }
+  )
+
+  // Watch the appearance of the device
+  watch(
+    () => appetizeControls.appearance,
+    async (appearance) => {
+      ;(await clientPromise).setConfig({
+        appearance: appearance
       })
     }
   )
@@ -167,11 +204,13 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
     meta,
     selector,
     actions: {
-      takeScreenshot
+      takeScreenshot,
+      endSession
     }
   })
 
   return {
+    meta,
     appetize,
     startSession,
     endSession,
@@ -179,7 +218,8 @@ const useAppetizeClient = (selector, application, sessionConfiguration) => {
     onSessionStarted,
     appetizeControls,
     takeScreenshot,
-    onScreenshotTaken
+    onScreenshotTaken,
+    onSessionEnded
   }
 }
 

@@ -11,10 +11,16 @@
           you will see the first article and trigger the share action.
         </div>
         <div class="flex flex-row space-x-4">
-          <div v-for="option in startOptions" :key="option.key" class="px-4 py-2 rounded-full cursor-pointer" :class="{
-    'bg-primary-600 font-bold': option.selected.value,
-    'bg-primary-200 hover:bg-primary-400': !option.selected.value
-  }" @click="option.selected.value = !option.selected.value">
+          <div
+            v-for="option in startOptions"
+            :key="option.key"
+            class="px-4 py-2 rounded-full cursor-pointer"
+            :class="{
+              'bg-primary-600 font-bold': option.selected.value,
+              'bg-primary-200 hover:bg-primary-400': !option.selected.value
+            }"
+            @click="option.selected.value = !option.selected.value"
+          >
             {{ option.name }}
           </div>
         </div>
@@ -26,15 +32,26 @@
           <div class="space-y-2">
             <v-label for="password">Password</v-label>
             <div class="relative w-full">
-              <v-input :type="!loginForm.passwordVisible ? 'password' : 'input'" class="w-full relative" name="password"
-                v-model="loginForm.password" />
+              <v-input
+                :type="!loginForm.passwordVisible ? 'password' : 'input'"
+                class="w-full relative"
+                name="password"
+                v-model="loginForm.password"
+              />
               <div class="h-full absolute top-0 right-0 flex flex-col justify-center pr-2">
-                <component class="h-6 w-6" :is="loginForm.passwordVisible ? EyeSlashIcon : EyeIcon"
-                  @click="loginForm.passwordVisible = !loginForm.passwordVisible" />
+                <component
+                  class="h-6 w-6"
+                  :is="loginForm.passwordVisible ? EyeSlashIcon : EyeIcon"
+                  @click="loginForm.passwordVisible = !loginForm.passwordVisible"
+                />
               </div>
             </div>
           </div>
-          <v-button @click="startFlow" :disabled="!isValid || processState.loading" class="w-full md:w-fit min-w-72">
+          <v-button
+            @click="startFlow"
+            :disabled="!isValid || processState.loading"
+            class="w-full md:w-fit min-w-60"
+          >
             {{ processState.loading ? 'Loading' : 'Start session' }}
           </v-button>
         </div>
@@ -66,7 +83,7 @@ const loginSampleId = 'loginSample'
 const startOptions = [
   {
     name: 'Skip login actions',
-    selected: ref(false),
+    selected: ref(true),
     key: 'hasCredentials',
     value: () => ({
       hasCredentials: startOptions[0].selected.value,
@@ -76,7 +93,7 @@ const startOptions = [
   },
   {
     name: 'Skip onboarding',
-    selected: ref(false),
+    selected: ref(true),
     key: 'skipOnboarding',
     value: () => ({
       skipOnboarding: startOptions[1].selected.value
@@ -100,10 +117,18 @@ const sessionConfig = {
 const screenshots = ref({})
 
 const processState = reactive({
+  // We will keep a track of an id because the flow can be stopped and we only want to show a dialog for the current run
+  id: markRaw(0),
   loading: false,
   error: null,
   failed: false,
   succeeded: false,
+  clear: () => {
+    processState.loading = false
+    processState.error = null
+    processState.succeeded = false
+    processState.failed = false
+  },
   setLoading: () => {
     processState.loading = true
     processState.error = null
@@ -127,11 +152,8 @@ const loginForm = reactive({
   passwordVisible: false
 })
 // Consuming the composition we have the business logic and state to only be consumed and reduce the overhead of logic
-const { appetize, onSessionStarted, onScreenshotTaken, appetizeControls } = useAppetizeClientFromId(
-  loginSampleId,
-  initialApplication,
-  sessionConfig
-)
+const { appetize, onSessionStarted, onScreenshotTaken, appetizeControls, onSessionEnded } =
+  useAppetizeClientFromId(loginSampleId, initialApplication, sessionConfig)
 
 // Helper to see if it's empty or null
 const isNotEmptyorNull = (value) => value != null && value != ''
@@ -140,24 +162,6 @@ const isNotEmptyorNull = (value) => value != null && value != ''
 const isValid = computed(
   () => isNotEmptyorNull(loginForm.password) && isNotEmptyorNull(loginForm.username)
 )
-
-onMounted(() => {
-  // Set callback once the session has started
-  onSessionStarted(async (session) => {
-    shareFlow(session, loginForm)
-  })
-
-  // Sets a listener whenever a ss was taken
-  onScreenshotTaken((data) => {
-    if (!screenshots.value[appetizeControls.device]) screenshots.value[appetizeControls.device] = []
-    screenshots.value[appetizeControls.device].push(
-      markRaw({
-        data,
-        name: `${new Date().getTime()}.jpg`
-      })
-    )
-  })
-})
 
 // Gets the configuration for the session
 const getConfig = (startOptions) => {
@@ -178,7 +182,7 @@ const startFlow = async () => {
   await appetize.client.startSession(getConfig(startOptions))
 }
 
-const shareFlow = async (session, { username, password }) => {
+const shareFlow = async (session, id) => {
   const skipLogin = startOptions[0]
   const skipOnboarding = startOptions[1]
   // Set as the flow has started
@@ -199,8 +203,11 @@ const shareFlow = async (session, { username, password }) => {
     // Everything went ok
     processState.setSucceeded()
   } catch (error) {
-    console.error(error)
-    processState.setFailed(error)
+    // It is the current run then show the dialog
+    if (id == processState.id) {
+      console.error(error)
+      processState.setFailed(error)
+    }
   }
 }
 
@@ -210,5 +217,30 @@ watch(startOptions[0].selected, async () => {
 
 watch(startOptions[1].selected, async () => {
   await appetize.client?.setConfig(getConfig(startOptions))
+})
+
+onMounted(() => {
+  // Set callback once the session has started
+  onSessionStarted(async (session) => {
+    processState.id += 1
+    shareFlow(session, processState.id)
+  })
+
+  // Sets a listener whenever a ss was taken
+  onScreenshotTaken((data) => {
+    if (!screenshots.value[appetizeControls.device]) screenshots.value[appetizeControls.device] = []
+    screenshots.value[appetizeControls.device].push(
+      markRaw({
+        data,
+        name: `${new Date().getTime()}.jpg`
+      })
+    )
+  })
+
+  // Register when the session has ended
+  onSessionEnded(() => {
+    processState.id += 1
+    processState.clear()
+  })
 })
 </script>

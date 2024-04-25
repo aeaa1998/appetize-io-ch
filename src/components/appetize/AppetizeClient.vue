@@ -7,7 +7,9 @@
             v-for="system in systems"
             :key="system"
             class="flex-1 py-4"
-            :class="{ 'bg-primary-600': applications[system] == appetizeControls?.application?.publicKey }"
+            :class="{
+              'bg-primary-600': applications[system] == appetizeControls?.application?.publicKey
+            }"
             @click="setSelectedApplication(system)"
           >
             {{ systemNames[system] }}
@@ -38,6 +40,7 @@
         v-if="controls"
         v-model:device="appetizeControls.device"
         v-model:version="appetizeControls.version"
+        v-model:appearance="appetizeControls.appearance"
         class="mt-8"
         :os="appetizeControls.application.os"
       />
@@ -106,8 +109,8 @@ const isLoading = computed(() => props.isLoading || state?.meta.isLoadingClient)
 // Get state if we are using a useAppetizeClient compose
 // Fallback is the first system
 const state = inject(appetizeClientKey)
-const appetizeControls = state?.controls ?? makeApplictionControls({ application: props.applications[systems[0]] })
-
+const appetizeControls =
+  state?.controls ?? makeApplictionControls({ application: props.applications[systems.value[0]] })
 
 const setSelectedApplication = (system) => {
   appetizeControls.application = getSelectedApplicationFromSystem(system)
