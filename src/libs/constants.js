@@ -15,8 +15,8 @@ const devices = {
     {
       name: 'Pixel 4',
       identifier: 'pixel4',
-      os: '10.0,11.0'.split(','),
-      defaultOs: '11.0'
+      os: '10.0'.split(','),
+      defaultOs: '10.0'
     },
     {
       name: 'Pixel 4XL',
