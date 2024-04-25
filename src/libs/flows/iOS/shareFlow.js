@@ -21,6 +21,11 @@ const shareFlow = async (session, { username, password }, { skipLogin, skipOnboa
   const loginPage = new LoginPage(session)
   const wikiPageView = new WikiPageView(session)
 
+  // If we are skipping login first thing we will do is to listen for the login event since it's called on viewDidLoad of AppViewController
+  if (skipLogin) {
+    await loginPage.waitForLoginResponse()
+  }
+
   // If we are nos skipping onboarding
   if (!skipOnboarding) {
     await onboardingPage.skipOnboarding()
@@ -29,9 +34,6 @@ const shareFlow = async (session, { username, password }, { skipLogin, skipOnboa
   // When we skip login we ommit the login flow
   if (!skipLogin) {
     await loginFlow(session, username, password)
-  } else {
-    // Else just wait for login to be completed
-    await loginPage.waitForLoginResponse()
   }
 
   // Continue with the flow in case we did not skipped login

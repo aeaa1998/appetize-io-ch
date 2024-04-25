@@ -70,7 +70,6 @@ export default class LoginPage {
       let response = null
       try {
         response = JSON.parse(data.response?.content?.text)
-        console.log(response)
         return (
           response?.clientlogin?.status?.toLowerCase() == 'pass' && data.response?.status == 200
         )
